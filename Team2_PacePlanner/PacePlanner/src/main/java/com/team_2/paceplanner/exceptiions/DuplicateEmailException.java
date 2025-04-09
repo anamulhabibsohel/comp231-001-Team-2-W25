@@ -1,0 +1,7 @@
+package com.team_2.paceplanner.exceptiions;
+
+public class DuplicateEmailException extends RuntimeException {
+    public DuplicateEmailException(String message) {
+        super(message);
+    }
+}
