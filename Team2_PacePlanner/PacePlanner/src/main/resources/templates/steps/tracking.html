@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Step Tracking - PacePlanner</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --secondary-color: #3a0ca3;
+            --accent-color: #4cc9f0;
+            --success-color: #4ade80;
+            --info-color: #38bdf8;
+            --light-bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text-color: #1e293b;
+            --text-muted: #64748b;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--light-bg);
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+
+        .navbar {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 0.8rem 1rem;
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        .navbar .nav-link {
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            transition: all 0.3s ease;
+            border-radius: 6px;
+            margin: 0 2px;
+        }
+
+        .navbar .nav-link:hover,
+        .navbar .nav-link.active {
+            background-color: rgba(255, 255, 255, 0.15);
+        }
+
+        .page-header {
+            padding: 2rem 0 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .page-title {
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--secondary-color);
+        }
+
+        .card {
+            border: none;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            margin-bottom: 2rem;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-header {
+            border-bottom: none;
+            padding: 1.25rem 1.5rem;
+        }
+
+        .header-success {
+            background: linear-gradient(135deg, var(--success-color), #22c55e);
+        }
+
+        .header-primary {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        }
+
+        .header-info {
+            background: linear-gradient(135deg, var(--info-color), var(--accent-color));
+        }
+
+        .card-header h5 {
+            font-weight: 600;
+            font-size: 1.25rem;
+        }
+
+        .card-body {
+            padding: 1.75rem;
+        }
+
+        .steps-icon {
+            font-size: 3.5rem;
+            background: linear-gradient(135deg, var(--success-color), #22c55e);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 0.5rem;
+        }
+
+        .steps-count {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, var(--secondary-color), var(--primary-color));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .progress {
+            height: 12px;
+            border-radius: 10px;
+            overflow: hidden;
+            background-color: #e2e8f0;
+        }
+
+        .progress-bar {
+            background: linear-gradient(to right, var(--success-color), #22c55e);
+            transition: width 1s ease;
+            border-radius: 10px;
+            position: relative;
+        }
+
+        .progress-label {
+            position: absolute;
+            right: 10px;
+            color: white;
+            font-weight: 600;
+            font-size: 0.75rem;
+        }
+
+        .goal-text {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            margin-top: 0.75rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .step-chart {
+            height: 300px;
+            margin-top: 20px;
+        }
+
+        .table {
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+
+        .table thead th {
+            background-color: rgba(76, 201, 240, 0.1);
+            color: var(--secondary-color);
+            font-weight: 600;
+            border: none;
+            padding: 1rem;
+        }
+
+        .table tbody td {
+            padding: 1rem;
+            border-top: 1px solid #e2e8f0;
+            vertical-align: middle;
+        }
+
+        .table tr:hover {
+            background-color: rgba(76, 201, 240, 0.05);
+        }
+
+        .goal-label {
+            display: inline-block;
+            padding: 0.35rem 0.75rem;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .goal-met {
+            background-color: rgba(74, 222, 128, 0.2);
+            color: #16a34a;
+        }
+
+        .goal-almost {
+            background-color: rgba(250, 204, 21, 0.2);
+            color: #ca8a04;
+        }
+
+        .goal-below {
+            background-color: rgba(248, 113, 113, 0.2);
+            color: #dc2626;
+        }
+
+        .btn-log {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 0.75rem 1.5rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(67, 97, 238, 0.25);
+        }
+
+        .btn-log:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(67, 97, 238, 0.35);
+            color: white;
+        }
+
+        .stats-card {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 1.25rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+            margin-bottom: 1.5rem;
+        }
+
+        .stats-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+        }
+
+        .stats-card h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            color: var(--text-color);
+        }
+
+        .stats-value {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 0;
+            color: var(--primary-color);
+        }
+
+        .stats-label {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+        }
+
+        footer {
+            background-color: var(--card-bg);
+            padding: 1.5rem 0;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+            margin-top: 5rem;
+        }
+    </style>
+</head>
+<body>
+<!-- Navigation Bar -->
+<nav class="navbar navbar-expand-lg navbar-dark">
+    <div class="container">
+        <a class="navbar-brand" href="/dashboard">
+            <i class="fas fa-running me-2"></i>PacePlanner
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link" href="/dashboard">
+                        <i class="fas fa-chart-line me-1"></i> Dashboard
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" href="/steps">
+                        <i class="fas fa-shoe-prints me-1"></i> Steps
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/weight">
+                        <i class="fas fa-weight me-1"></i> Weight
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/gps">
+                        <i class="fas fa-map-marker-alt me-1"></i> GPS
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/workouts">
+                        <i class="fas fa-dumbbell me-1"></i> Workouts
+                    </a>
+                </li>
+            </ul>
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="/profile">
+                        <i class="fas fa-user-circle me-1"></i> Profile
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/logout">
+                        <i class="fas fa-sign-out-alt me-1"></i> Logout
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- Main Content -->
+<div class="container">
+    <div class="page-header">
+        <div>
+            <h1 class="page-title">Step Tracking</h1>
+            <p class="lead text-muted">Monitor your daily and weekly step progress</p>
+        </div>
+        <div>
+            <a href="/steps/log" class="btn btn-log">
+                <i class="fas fa-plus me-2"></i> Log Steps
+            </a>
+        </div>
+    </div>
+
+    <!-- Summary Stats -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="stats-card">
+                <h3><i class="fas fa-calendar-day me-2 text-primary"></i>Today</h3>
+                <p class="stats-value" th:text="${todaySteps != null ? todaySteps.steps : 0}">0</p>
+                <p class="stats-label">steps</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stats-card">
+                <h3><i class="fas fa-calendar-week me-2 text-info"></i>Weekly Average</h3>
+                <p class="stats-value" th:text="${weeklyAvg != null ? weeklyAvg : 0}">0</p>
+                <p class="stats-label">steps per day</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stats-card">
+                <h3><i class="fas fa-fire me-2 text-danger"></i>Weekly Total</h3>
+                <p class="stats-value" th:text="${weeklyTotal != null ? weeklyTotal : 0}">0</p>
+                <p class="stats-label">steps this week</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Today's Steps Card -->
+    <div class="card">
+        <div class="card-header header-success text-white">
+            <h5 class="mb-0"><i class="fas fa-shoe-prints me-2"></i>Today's Progress</h5>
+        </div>
+        <div class="card-body">
+            <div class="row align-items-center">
+                <div class="col-md-3 text-center">
+                    <i class="fas fa-shoe-prints steps-icon"></i>
+                    <h2 class="steps-count" th:text="${todaySteps != null ? todaySteps.steps : 0}">0</h2>
+                </div>
+                <div class="col-md-9">
+                    <div class="mb-2 d-flex justify-content-between">
+                        <span class="fw-medium">Daily Goal Progress</span>
+                        <span class="fw-bold"
+                              th:text="${todaySteps != null ? (todaySteps.steps < 10000 ? todaySteps.steps * 100 / 10000 : 100) : 0} + '%'">0%</span>
+                    </div>
+                    <div class="progress">
+                        <div class="progress-bar" role="progressbar"
+                             th:style="'width:' + ${todaySteps != null ? (todaySteps.steps < 10000 ? todaySteps.steps * 100 / 10000 : 100) : 0} + '%'"
+                             aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+                        </div>
+                    </div>
+                    <div class="goal-text">
+                        <i class="fas fa-bullseye me-2 text-success"></i>
+                        Daily Goal: 10,000 steps
+                    </div>
+
+                    <div class="mt-4">
+                        <h6 class="fw-bold">Estimated Benefits:</h6>
+                        <div class="row text-center mt-3">
+                            <div class="col-4">
+                                <i class="fas fa-fire-flame-curved text-danger"></i>
+                                <p class="fw-medium mb-0"
+                                   th:text="${todaySteps != null ? todaySteps.steps * 0.04 : 0} + ' kcal'">0 kcal</p>
+                                <small class="text-muted">Calories</small>
+                            </div>
+                            <div class="col-4">
+                                <i class="fas fa-heart-pulse text-success"></i>
+                                <p class="fw-medium mb-0"
+                                   th:text="${todaySteps != null ? todaySteps.steps * 0.0008 : 0} + ' km'">0 km</p>
+                                <small class="text-muted">Distance</small>
+                            </div>
+                            <div class="col-4">
+                                <i class="fas fa-clock text-primary"></i>
+                                <p class="fw-medium mb-0"
+                                   th:text="${todaySteps != null ? todaySteps.steps * 0.0005 : 0} + ' min'">0 min</p>
+                                <small class="text-muted">Active Time</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Weekly Steps Chart -->
+    <div class="card">
+        <div class="card-header header-primary text-white">
+            <h5 class="mb-0"><i class="fas fa-chart-column me-2"></i>Weekly Step Activity</h5>
+        </div>
+        <div class="card-body">
+            <canvas id="weeklyStepsChart" class="step-chart"></canvas>
+        </div>
+    </div>
+
+    <!-- Weekly Stats Table -->
+    <div class="card">
+        <div class="card-header header-info text-white">
+            <h5 class="mb-0"><i class="fas fa-table-list me-2"></i>Weekly Step Details</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Day</th>
+                        <th>Steps</th>
+                        <th>Progress</th>
+                        <th>Status</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="record : ${weeklySteps}">
+                        <td th:text="${#temporals.format(record.trackingDate, 'MMM dd, yyyy')}">Date</td>
+                        <td th:text="${#temporals.format(record.trackingDate, 'EEEE')}">Day</td>
+                        <td class="fw-bold" th:text="${record.steps}">0</td>
+                        <td style="width: 30%">
+                            <div class="progress">
+                                <div class="progress-bar" role="progressbar"
+                                     th:style="'width:' + (${record.steps} < 10000 ? (${record.steps} * 100 / 10000) : 100) + '%'"
+                                     th:attr="aria-valuenow=${record.steps}, aria-valuemin='0', aria-valuemax='10000'">
+ <span class="progress-label" th:if="${record.steps > 2000}"
+       th:text="${record.steps < 10000 ? T(java.lang.Math).round(record.steps * 100.0 / 10000) + '%' : '100%'}">
+ </span>
+
+                                </div>
+                            </div>
+
+                        </td>
+                        <td>
+                            <span class="goal-label"
+                                  th:classappend="${record.steps >= 10000 ? 'goal-met' : (record.steps >= 7500 ? 'goal-almost' : 'goal-below')}"
+                                  th:text="${record.steps >= 10000 ? 'Goal Met!' : (record.steps >= 7500 ? 'Almost There' : 'In Progress')}">
+                                Status
+                            </span>
+                        </td>
+                    </tr>
+                    <tr th:if="${weeklySteps.empty}">
+                        <td colspan="5" class="text-center py-4">
+                            <i class="fas fa-info-circle me-2 text-muted"></i>
+                            No step data available for this week
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Footer -->
+<footer class="text-center text-muted">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-8 mx-auto">
+                <p class="mb-2">
+                    <i class="fas fa-heart text-danger me-1"></i>
+                    PacePlanner helps you track progress and achieve your fitness goals
+                </p>
+                <p class="small mb-0">&copy; 2025 PacePlanner. All rights reserved.</p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+<script th:inline="javascript">
+    // Get weekly steps data from Thymeleaf
+    const weeklySteps = /*[[${weeklySteps}]]*/ [];
+
+    // Prepare data for chart
+    const labels = weeklySteps.map(day => {
+        const date = new Date(day.trackingDate);
+        return date.toLocaleDateString('en-US', {weekday: 'short'});
+    });
+
+    const stepsData = weeklySteps.map(day => day.steps);
+
+    // Add goal line
+    const goalLine = Array(labels.length).fill(10000);
+
+    // Create chart with animation
+    document.addEventListener('DOMContentLoaded', function () {
+        const ctx = document.getElementById('weeklyStepsChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [
+                    {
+                        label: 'Steps',
+                        data: stepsData,
+                        backgroundColor: 'rgba(67, 97, 238, 0.7)',
+                        borderColor: 'rgba(67, 97, 238, 1)',
+                        borderWidth: 1,
+                        borderRadius: 6,
+                        barPercentage: 0.6,
+                        categoryPercentage: 0.8
+                    },
+                    {
+                        label: 'Daily Goal',
+                        data: goalLine,
+                        type: 'line',
+                        borderColor: 'rgba(74, 222, 128, 0.8)',
+                        borderWidth: 2,
+                        borderDash: [5, 5],
+                        fill: false,
+                        pointBackgroundColor: 'rgba(74, 222, 128, 0)',
+                        pointBorderColor: 'rgba(74, 222, 128, 0)',
+                        pointHoverBackgroundColor: 'rgba(74, 222, 128, 1)',
+                        pointHoverBorderColor: 'rgba(74, 222, 128, 1)',
+                        tension: 0
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                animation: {
+                    duration: 1500,
+                    easing: 'easeOutQuart'
+                },
+                plugins: {
+                    legend: {
+                        labels: {
+                            usePointStyle: true,
+                            padding: 15,
+                            boxWidth: 8
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                        titleColor: '#1e293b',
+                        bodyColor: '#1e293b',
+                        borderColor: '#e2e8f0',
+                        borderWidth: 1,
+                        padding: 12,
+                        boxWidth: 10,
+                        usePointStyle: true,
+                        callbacks: {
+                            label: function (context) {
+                                return `${context.dataset.label}: ${context.raw.toLocaleString()} steps`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            display: true,
+                            color: 'rgba(0, 0, 0, 0.05)'
+                        },
+                        border: {
+                            display: false
+                        },
+                        ticks: {
+                            padding: 10,
+                            color: '#64748b'
+                        },
+                        title: {
+                            display: true,
+                            text: 'Step Count',
+                            color: '#64748b',
+                            font: {
+                                size: 12,
+                                weight: '500'
+                            },
+                            padding: {top: 0, bottom: 10}
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        },
+                        border: {
+                            display: false
+                        },
+                        ticks: {
+                            padding: 10,
+                            color: '#64748b'
+                        },
+                        title: {
+                            display: true,
+                            text: 'Day of Week',
+                            color: '#64748b',
+                            font: {
+                                size: 12,
+                                weight: '500'
+                            },
+                            padding: {top: 10, bottom: 0}
+                        }
+                    }
+                }
+            }
+        });
+
+        // Animate progress bars on load
+        const progressBars = document.querySelectorAll('.progress-bar');
+        progressBars.forEach(bar => {
+            const finalWidth = bar.style.width;
+            bar.style.width = '0%';
+            setTimeout(() => {
+                bar.style.width = finalWidth;
+            }, 300);
+        });
+    });
+</script>
+</body>
+</html>

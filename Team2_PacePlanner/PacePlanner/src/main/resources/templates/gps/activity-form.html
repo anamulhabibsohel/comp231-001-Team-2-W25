@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Log GPS Activity - PacePlanner</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/main.css">
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <div class="container">
+        <a class="navbar-brand" href="/dashboard">PacePlanner</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link" href="/dashboard">Dashboard</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" href="/gps">GPS Tracking</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/steps">Step Tracking</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/weight">Weight Tracking</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/workouts">Workouts</a>
+                </li>
+            </ul>
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="/logout">Logout</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="container my-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Log GPS Activity</h1>
+        <a href="/gps" class="btn btn-secondary">Back to GPS Activities</a>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Activity Details</h5>
+                </div>
+                <div class="card-body">
+                    <form th:action="@{/gps/save}" th:object="${gpsTracking}" method="post">
+                        <input type="hidden" th:field="*{userId}" />
+
+                        <!-- Required fields for GpsTracking entity -->
+                        <input type="hidden" th:field="*{latitude}" value="0" />
+                        <input type="hidden" th:field="*{longitude}" value="0" />
+                        <input type="hidden" th:field="*{altitude}" value="0" />
+
+                        <!-- Activity Date (will be converted to recordedAt) -->
+                        <div class="mb-3">
+                            <label for="recordedAt" class="form-label">Activity Date</label>
+                            <input type="datetime-local" class="form-control" id="recordedAt" th:field="*{recordedAt}" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="activityType" class="form-label">Activity Type</label>
+                            <select class="form-select" id="activityType" th:field="*{activityType}" required>
+                                <option value="">Select Activity Type</option>
+                                <option value="Running">Running</option>
+                                <option value="Walking">Walking</option>
+                                <option value="Cycling">Cycling</option>
+                                <option value="Hiking">Hiking</option>
+                                <option value="Swimming">Swimming</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="distance" class="form-label">Distance (km)</label>
+                                <input type="number" step="0.01" min="0" class="form-control" id="distance" th:field="*{distance}" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="duration" class="form-label">Duration (hh:mm:ss)</label>
+                                <input type="text" class="form-control" id="duration" th:field="*{duration}"
+                                       placeholder="e.g. 01:30:00" pattern="[0-9]{1,2}:[0-5][0-9]:[0-5][0-9]" required>
+                                <div class="form-text">Format: hh:mm:ss (e.g. 01:30:00 for 1 hour and 30 minutes)</div>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="pace" class="form-label">Average Pace (min/km)</label>
+                                <input type="text" class="form-control" id="pace" th:field="*{pace}"
+                                       placeholder="e.g. 5:30" pattern="[0-9]{1,2}:[0-5][0-9]">
+                                <div class="form-text">Format: mm:ss (e.g. 5:30 for 5 minutes 30 seconds per km)</div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="elevationGain" class="form-label">Elevation Gain (m)</label>
+                                <input type="number" class="form-control" id="elevationGain" th:field="*{elevationGain}">
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="activityName" class="form-label">Activity Name</label>
+                            <input type="text" class="form-control" id="activityName" th:field="*{activityName}" required>
+                            <div class="form-text">Give your activity a name (e.g. "Morning Run", "City Park Loop")</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="notes" class="form-label">Notes</label>
+                            <textarea class="form-control" id="notes" th:field="*{notes}" rows="3"></textarea>
+                            <div class="form-text">Add any notes about your activity (optional)</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="routeData" class="form-label">Route (optional)</label>
+                            <textarea class="form-control" id="routeData" th:field="*{routeData}" rows="3"></textarea>
+                            <div class="form-text">If you have GPS route data, paste it here (GeoJSON or GPX format)</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="calculatedPace">
+                                <label class="form-check-label" for="calculatedPace">
+                                    Calculate pace from distance and duration
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">Save Activity</button>
+                            <a href="/gps" class="btn btn-outline-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer class="bg-light py-3 mt-5">
+    <div class="container text-center">
+        <p class="mb-0">© 2025 PacePlanner. All rights reserved.</p>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Set default datetime to now
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+
+        document.getElementById('recordedAt').value = `${year}-${month}-${day}T${hours}:${minutes}`;
+
+        // Auto calculate pace when checkbox is checked
+        const distanceInput = document.getElementById('distance');
+        const durationInput = document.getElementById('duration');
+        const paceInput = document.getElementById('pace');
+        const calculatePaceCheckbox = document.getElementById('calculatedPace');
+
+        function calculatePace() {
+            if (!calculatePaceCheckbox.checked) return;
+
+            const distance = parseFloat(distanceInput.value);
+            const durationParts = durationInput.value.split(':');
+
+            if (distance > 0 && durationParts.length === 3) {
+                const hours = parseInt(durationParts[0], 10);
+                const minutes = parseInt(durationParts[1], 10);
+                const seconds = parseInt(durationParts[2], 10);
+
+                const totalMinutes = (hours * 60) + minutes + (seconds / 60);
+                const paceMinutes = Math.floor(totalMinutes / distance);
+                const paceSeconds = Math.round((totalMinutes / distance - paceMinutes) * 60);
+
+                paceInput.value = paceMinutes + ':' +
+                    (paceSeconds < 10 ? '0' + paceSeconds : paceSeconds);
+            }
+        }
+
+        distanceInput.addEventListener('input', calculatePace);
+        durationInput.addEventListener('input', calculatePace);
+        calculatePaceCheckbox.addEventListener('change', calculatePace);
+    });
+</script>
+</body>
+</html>

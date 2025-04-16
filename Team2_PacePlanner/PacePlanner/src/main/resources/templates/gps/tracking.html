@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GPS Activity Tracking - PacePlanner</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/main.css">
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <div class="container">
+        <a class="navbar-brand" href="/dashboard">PacePlanner</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link" href="/dashboard">Dashboard</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" href="/gps">GPS Tracking</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/steps">Step Tracking</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/weight">Weight Tracking</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/workouts">Workouts</a>
+                </li>
+            </ul>
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="/logout">Logout</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="container my-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>GPS Activity Tracking</h1>
+        <div>
+            <a href="/gps/live" class="btn btn-success me-2">Start Live Tracking</a>
+            <a href="/gps/new" class="btn btn-primary">Log New Activity</a>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="card-title mb-0">Recent Activities</h5>
+        </div>
+        <div class="card-body">
+            <div th:if="${#lists.isEmpty(gpsData)}" class="alert alert-info">
+                No GPS activities found. Start tracking or log a new activity!
+            </div>
+
+            <div th:if="${not #lists.isEmpty(gpsData)}" class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Activity Type</th>
+                        <th>Distance (km)</th>
+                        <th>Duration</th>
+                        <th>Avg. Pace</th>
+                        <th>Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="activity : ${gpsData}">
+                        <td th:text="${#temporals.format(activity.recordedAt, 'MMM dd, yyyy')}">Jan 1, 2025</td>
+                        <td th:text="${activity.activityType}">Running</td>
+                        <td th:text="${activity.distance != null ? #numbers.formatDecimal(activity.distance, 1, 2) + ' km' : '-'}">5.00 km</td>
+                        <td th:text="${activity.duration != null ? activity.duration : '-'}">30:00</td>
+                        <td th:text="${activity.pace != null ? activity.pace : '-'}">6:00 min/km</td>
+                        <td>
+                            <a th:href="@{/gps/view/{id}(id=${activity.id})}" class="btn btn-sm btn-info">View</a>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h5 class="card-title mb-0">Activity Statistics</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <div class="card bg-light">
+                        <div class="card-body text-center">
+                            <h5 class="card-title">Total Distance</h5>
+                            <p class="display-4" th:text="${#lists.isEmpty(gpsData) ? '0 km' : (#aggregates.sum(gpsData.![distance != null ? distance : 0]) != null ? #numbers.formatDecimal(#aggregates.sum(gpsData.![distance != null ? distance : 0]), 1, 2) + ' km' : '0 km')}">0 km</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <div class="card bg-light">
+                        <div class="card-body text-center">
+                            <h5 class="card-title">Activities This Month</h5>
+                            <p class="display-4" th:text="${#lists.size(gpsData)}">0</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <div class="card bg-light">
+                        <div class="card-body text-center">
+                            <h5 class="card-title">Average Pace</h5>
+                            <p class="display-4" th:text="${#lists.isEmpty(gpsData) || #lists.size(gpsData.?[pace != null]) == 0 ? '--:--' : 'Calc. in progress'}">--:--</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer class="bg-light py-3 mt-5">
+    <div class="container text-center">
+        <p class="mb-0">© 2025 PacePlanner. All rights reserved.</p>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

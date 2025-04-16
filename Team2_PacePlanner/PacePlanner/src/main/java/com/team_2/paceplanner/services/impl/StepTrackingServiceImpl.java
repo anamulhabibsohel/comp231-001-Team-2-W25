@@ -6,7 +6,9 @@ import com.team_2.paceplanner.services.StepTrackingService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -28,5 +30,12 @@ public class StepTrackingServiceImpl implements StepTrackingService {
     @Override
     public Optional<StepTracking> getStepsForDate(Long userId, LocalDate date) {
         return repository.findByUserIdAndTrackingDate(userId, date);
+    }
+
+    @Override
+    public List<StepTracking> getWeeklySteps(Long userId) {
+        LocalDate startOfWeek = LocalDate.now().with(java.time.DayOfWeek.MONDAY);
+        LocalDate endOfWeek = startOfWeek.plusDays(6);
+        return repository.findByUserIdAndTrackingDateBetween(userId, startOfWeek, endOfWeek);
     }
 }

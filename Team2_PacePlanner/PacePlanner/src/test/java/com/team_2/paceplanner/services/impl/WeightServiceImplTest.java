@@ -27,7 +27,7 @@ class WeightServiceImplTest {
     @Test
     @DisplayName("saveWeight should save valid weight record")
     void saveWeightShouldSaveValidWeightRecord() {
-        WeightRecordDTO dto = new WeightRecordDTO(1L, LocalDate.now(), 70.5);
+        WeightRecordDTO dto = new WeightRecordDTO(1L, LocalDate.now(), 70.5, null);
         service.saveWeight(dto);
 
         ArgumentCaptor<WeightRecord> captor = ArgumentCaptor.forClass(WeightRecord.class);
@@ -42,7 +42,7 @@ class WeightServiceImplTest {
     @Test
     @DisplayName("saveWeight should handle null date")
     void saveWeightShouldHandleNullDate() {
-        WeightRecordDTO dto = new WeightRecordDTO(1L, null, 70.5);
+        WeightRecordDTO dto = new WeightRecordDTO(1L, null, 70.5, null);
         service.saveWeight(dto);
 
         ArgumentCaptor<WeightRecord> captor = ArgumentCaptor.forClass(WeightRecord.class);
@@ -55,7 +55,7 @@ class WeightServiceImplTest {
     @Test
     @DisplayName("saveWeight should handle zero weight")
     void saveWeightShouldHandleZeroWeight() {
-        WeightRecordDTO dto = new WeightRecordDTO(1L, LocalDate.now(), 0.0);
+        WeightRecordDTO dto = new WeightRecordDTO(1L, LocalDate.now(), 0.0, null);
         service.saveWeight(dto);
 
         ArgumentCaptor<WeightRecord> captor = ArgumentCaptor.forClass(WeightRecord.class);
@@ -68,7 +68,7 @@ class WeightServiceImplTest {
     @Test
     @DisplayName("saveWeight should handle negative weight")
     void saveWeightShouldHandleNegativeWeight() {
-        WeightRecordDTO dto = new WeightRecordDTO(1L, LocalDate.now(), -5.0);
+        WeightRecordDTO dto = new WeightRecordDTO(1L, LocalDate.now(), -5.0, null);
         service.saveWeight(dto);
 
         ArgumentCaptor<WeightRecord> captor = ArgumentCaptor.forClass(WeightRecord.class);

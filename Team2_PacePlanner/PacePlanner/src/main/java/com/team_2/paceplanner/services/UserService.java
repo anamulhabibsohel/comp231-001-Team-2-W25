@@ -12,4 +12,6 @@ public interface UserService {
 
     String generateToken(User user);
 
+    boolean checkPassword(String rawPassword, String hashedPassword);
+
 }

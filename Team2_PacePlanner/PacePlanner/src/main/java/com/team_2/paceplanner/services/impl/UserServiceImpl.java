@@ -64,4 +64,10 @@ public class UserServiceImpl implements UserService {
                 .signWith(secretKey)
                 .compact();
     }
+
+
+    @Override
+    public boolean checkPassword(String rawPassword, String hashedPassword) {
+        return BCrypt.checkpw(rawPassword, hashedPassword);
+    }
 }

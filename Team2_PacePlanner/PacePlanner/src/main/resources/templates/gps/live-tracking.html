@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live GPS Tracking - PacePlanner</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+    <link rel="stylesheet" href="/css/main.css">
+    <style>
+        #map {
+            height: 500px;
+            width: 100%;
+            border-radius: 8px;
+        }
+
+        .tracking-stats {
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .tracking-controls {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <div class="container">
+        <a class="navbar-brand" href="/dashboard">PacePlanner</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link" href="/dashboard">Dashboard</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" href="/gps">GPS Tracking</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/steps">Step Tracking</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/weight">Weight Tracking</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/workouts">Workouts</a>
+                </li>
+            </ul>
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="/logout">Logout</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="container my-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Live GPS Tracking</h1>
+        <a href="/gps" class="btn btn-secondary">Back to GPS Activities</a>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-body p-2">
+                    <div id="map"></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Live Stats</h5>
+                </div>
+                <div class="card-body">
+                    <div class="tracking-stats">
+                        <div class="row mb-3">
+                            <div class="col">
+                                <div class="text-muted">Distance</div>
+                                <div class="stat-value" id="distance">0.00 km</div>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col">
+                                <div class="text-muted">Duration</div>
+                                <div class="stat-value" id="duration">00:00:00</div>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col">
+                                <div class="text-muted">Current Pace</div>
+                                <div class="stat-value" id="current-pace">--:-- min/km</div>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col">
+                                <div class="text-muted">Average Pace</div>
+                                <div class="stat-value" id="average-pace">--:-- min/km</div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col">
+                                <div class="text-muted">Elevation Gain</div>
+                                <div class="stat-value" id="elevation">0 m</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="tracking-controls">
+                        <div class="row">
+                            <div class="col">
+                                <select id="activity-type" class="form-select mb-3">
+                                    <option value="Running">Running</option>
+                                    <option value="Walking">Walking</option>
+                                    <option value="Cycling">Cycling</option>
+                                    <option value="Hiking">Hiking</option>
+                                </select>
+                            </div>
+                        </div>
+                        <button id="start-tracking" class="btn btn-success btn-lg w-100 mb-2">Start Tracking</button>
+                        <button id="pause-tracking" class="btn btn-warning btn-lg w-100 mb-2" disabled>Pause</button>
+                        <button id="stop-tracking" class="btn btn-danger btn-lg w-100" disabled>Finish & Save</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Activity Completion Modal -->
+<div class="modal fade" id="activityCompletedModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Activity Completed!</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="save-activity-form" method="post" action="/gps/save">
+                    <!-- Required fields from GpsTracking entity -->
+                    <input type="hidden" id="latitude" name="latitude" value="0">
+                    <input type="hidden" id="longitude" name="longitude" value="0">
+                    <input type="hidden" id="altitude" name="altitude" value="0">
+                    <input type="hidden" id="routeData" name="routeData">
+
+                    <!-- Activity details -->
+                    <input type="hidden" id="activityType" name="activityType">
+                    <input type="hidden" id="distance" name="distance">
+                    <input type="hidden" id="duration" name="duration">
+                    <input type="hidden" id="pace" name="pace">
+                    <input type="hidden" id="elevationGain" name="elevationGain">
+
+                    <div class="mb-3">
+                        <label for="activityName" class="form-label">Activity Name</label>
+                        <input type="text" class="form-control" id="activityName" name="activityName" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="notes" class="form-label">Notes</label>
+                        <textarea class="form-control" id="notes" name="notes" rows="3"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Save Activity</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer class="bg-light py-3 mt-5">
+    <div class="container text-center">
+        <p class="mb-0">© 2025 PacePlanner. All rights reserved.</p>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Initialize map
+        const map = L.map('map').setView([51.505, -0.09], 13);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+
+        let tracking = false;
+        let paused = false;
+        let startTime = null;
+        let elapsedTime = 0;
+        let timer = null;
+        let trackPoints = [];
+        let trackLine = null;
+
+        // Buttons
+        const startBtn = document.getElementById('start-tracking');
+        const pauseBtn = document.getElementById('pause-tracking');
+        const stopBtn = document.getElementById('stop-tracking');
+
+        // UI elements
+        const distanceElement = document.getElementById('distance');
+        const durationElement = document.getElementById('duration');
+        const currentPaceElement = document.getElementById('current-pace');
+        const averagePaceElement = document.getElementById('average-pace');
+        const elevationElement = document.getElementById('elevation');
+
+        // Use browser geolocation to center map on user's location
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(position => {
+                const userLocation = [position.coords.latitude, position.coords.longitude];
+                map.setView(userLocation, 15);
+                L.marker(userLocation).addTo(map)
+                    .bindPopup('Your current location')
+                    .openPopup();
+            }, error => {
+                console.error('Error getting location:', error);
+            });
+        }
+
+        // Start tracking button click handler
+        startBtn.addEventListener('click', function () {
+            if (!tracking) {
+                startTracking();
+            } else {
+                resumeTracking();
+            }
+        });
+
+        // Pause tracking button click handler
+        pauseBtn.addEventListener('click', function () {
+            pauseTracking();
+        });
+
+        // Stop tracking button click handler
+        stopBtn.addEventListener('click', function () {
+            stopTracking();
+        });
+
+        function startTracking() {
+            tracking = true;
+            paused = false;
+            startTime = new Date();
+            trackPoints = [];
+
+            if (trackLine) {
+                map.removeLayer(trackLine);
+            }
+
+            startBtn.disabled = true;
+            pauseBtn.disabled = false;
+            stopBtn.disabled = false;
+
+            // Start the timer
+            timer = setInterval(updateTimer, 1000);
+
+            // Start GPS tracking
+            if (navigator.geolocation) {
+                navigator.geolocation.watchPosition(
+                    updatePosition,
+                    error => console.error('Error tracking position:', error),
+                    {enableHighAccuracy: true}
+                );
+            }
+        }
+
+        function pauseTracking() {
+            paused = !paused;
+
+            if (paused) {
+                pauseBtn.textContent = 'Resume';
+                pauseBtn.classList.replace('btn-warning', 'btn-success');
+                elapsedTime += (new Date() - startTime) / 1000;
+                clearInterval(timer);
+            } else {
+                pauseBtn.textContent = 'Pause';
+                pauseBtn.classList.replace('btn-success', 'btn-warning');
+                startTime = new Date();
+                timer = setInterval(updateTimer, 1000);
+            }
+        }
+
+        function resumeTracking() {
+            startBtn.disabled = true;
+            pauseBtn.disabled = false;
+            pauseBtn.textContent = 'Pause';
+            pauseBtn.classList.replace('btn-success', 'btn-warning');
+            paused = false;
+            startTime = new Date();
+            timer = setInterval(updateTimer, 1000);
+        }
+
+        function stopTracking() {
+            tracking = false;
+            clearInterval(timer);
+            startBtn.disabled = false;
+            pauseBtn.disabled = true;
+            stopBtn.disabled = true;
+
+            // Calculate final stats
+            const distance = calculateTotalDistance();
+            distanceElement.textContent = distance.toFixed(2) + ' km';
+
+            // Get the last position for the database record (or use first point if available)
+            let finalLat = 0, finalLng = 0, finalAlt = 0;
+            if (trackPoints.length > 0) {
+                const lastPoint = trackPoints[trackPoints.length - 1];
+                finalLat = lastPoint.lat;
+                finalLng = lastPoint.lng;
+                finalAlt = lastPoint.alt;
+            }
+
+            // Fill form data
+            document.getElementById('activityType').value = document.getElementById('activity-type').value;
+            document.getElementById('distance').value = distance.toFixed(2);
+            document.getElementById('duration').value = durationElement.textContent;
+            document.getElementById('pace').value = averagePaceElement.textContent;
+            document.getElementById('elevationGain').value = parseInt(elevationElement.textContent);
+
+            // Set the coordinates for the entity
+            document.getElementById('latitude').value = finalLat;
+            document.getElementById('longitude').value = finalLng;
+            document.getElementById('altitude').value = finalAlt;
+
+            // Store the entire route data as JSON
+            document.getElementById('routeData').value = JSON.stringify(trackPoints);
+
+            // Show completion modal
+            const modal = new bootstrap.Modal(document.getElementById('activityCompletedModal'));
+            modal.show();
+        }
+
+        function updatePosition(position) {
+            if (!tracking || paused) return;
+
+            const lat = position.coords.latitude;
+            const lng = position.coords.longitude;
+            const alt = position.coords.altitude || 0;
+            const timestamp = new Date().getTime();
+
+            const point = {
+                lat: lat,
+                lng: lng,
+                alt: alt,
+                timestamp: timestamp
+            };
+
+            trackPoints.push(point);
+
+            // Update map with new track line
+            drawTrackLine();
+
+            // Update stats
+            updateStats();
+        }
+
+        function drawTrackLine() {
+            if (trackLine) {
+                map.removeLayer(trackLine);
+            }
+
+            const points = trackPoints.map(p => [p.lat, p.lng]);
+            if (points.length >= 2) {
+                trackLine = L.polyline(points, {color: 'blue', weight: 5}).addTo(map);
+                map.fitBounds(trackLine.getBounds());
+            }
+        }
+
+        function updateTimer() {
+            if (!tracking || paused) return;
+
+            const currentTime = new Date();
+            const totalSeconds = elapsedTime + (currentTime - startTime) / 1000;
+
+            const hours = Math.floor(totalSeconds / 3600);
+            const minutes = Math.floor((totalSeconds % 3600) / 60);
+            const seconds = Math.floor(totalSeconds % 60);
+
+            durationElement.textContent =
+                (hours < 10 ? '0' + hours : hours) + ':' +
+                (minutes < 10 ? '0' + minutes : minutes) + ':' +
+                (seconds < 10 ? '0' + seconds : seconds);
+
+            updateStats();
+        }
+
+        function updateStats() {
+            const distance = calculateTotalDistance();
+            distanceElement.textContent = distance.toFixed(2) + ' km';
+
+            const currentTime = new Date();
+            const totalSeconds = elapsedTime + (currentTime - startTime) / 1000;
+
+            // Calculate pace (min/km)
+            if (distance > 0) {
+                const paceSeconds = totalSeconds / distance;
+                const paceMinutes = Math.floor(paceSeconds / 60);
+                const paceRemainderSeconds = Math.floor(paceSeconds % 60);
+
+                averagePaceElement.textContent =
+                    paceMinutes + ':' +
+                    (paceRemainderSeconds < 10 ? '0' + paceRemainderSeconds : paceRemainderSeconds) +
+                    ' min/km';
+
+                // Current pace - based on last 500m
+                if (trackPoints.length > 5) {
+                    const recentPoints = trackPoints.slice(-5);
+                    const recentDistance = calculateDistanceFromPoints(recentPoints);
+                    const lastTimestamp = recentPoints[recentPoints.length - 1].timestamp;
+                    const firstTimestamp = recentPoints[0].timestamp;
+                    const timespan = (lastTimestamp - firstTimestamp) / 1000;
+
+                    if (timespan > 0 && recentDistance > 0) {
+                        const currentPaceSeconds = timespan / recentDistance;
+                        const currentPaceMinutes = Math.floor(currentPaceSeconds / 60);
+                        const currentPaceRemainderSeconds = Math.floor(currentPaceSeconds % 60);
+
+                        currentPaceElement.textContent =
+                            currentPaceMinutes + ':' +
+                            (currentPaceRemainderSeconds < 10 ? '0' + currentPaceRemainderSeconds : currentPaceRemainderSeconds) +
+                            ' min/km';
+                    }
+                }
+            }
+
+            // Calculate elevation gain
+            let elevationGain = 0;
+            for (let i = 1; i < trackPoints.length; i++) {
+                const elevationDiff = trackPoints[i].alt - trackPoints[i - 1].alt;
+                if (elevationDiff > 0) {
+                    elevationGain += elevationDiff;
+                }
+            }
+            elevationElement.textContent = Math.round(elevationGain) + ' m';
+        }
+
+        function calculateTotalDistance() {
+            return calculateDistanceFromPoints(trackPoints);
+        }
+
+        function calculateDistanceFromPoints(points) {
+            let totalDistance = 0;
+            for (let i = 1; i < points.length; i++) {
+                totalDistance += calculateDistance(
+                    points[i - 1].lat, points[i - 1].lng,
+                    points[i].lat, points[i].lng
+                );
+            }
+            return totalDistance;
+        }
+
+        function calculateDistance(lat1, lon1, lat2, lon2) {
+            const R = 6371; // Radius of the earth in km
+            const dLat = deg2rad(lat2 - lat1);
+            const dLon = deg2rad(lon2 - lon1);
+            const a =
+                Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) *
+                Math.sin(dLon / 2) * Math.sin(dLon / 2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+            const distance = R * c; // Distance in km
+            return distance;
+        }
+
+        function deg2rad(deg) {
+            return deg * (Math.PI / 180);
+        }
+    });
+</script>
+</body>
+</html>

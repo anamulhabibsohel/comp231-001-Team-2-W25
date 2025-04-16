@@ -30,5 +30,8 @@ public class StepTracking {
     @Column(nullable = false)
     private LocalDate trackingDate;
 
+    @Column(length = 500)
+    private String notes;
+
     private LocalDateTime createdAt = LocalDateTime.now();
 }

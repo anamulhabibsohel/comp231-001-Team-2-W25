@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - PacePlanner</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --secondary-color: #3f37c9;
+            --accent-color: #4895ef;
+            --success-color: #2ecc71;
+            --danger-color: #e74c3c;
+            --warning-color: #f39c12;
+            --light-bg: #f8f9fa;
+            --dark-text: #212529;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f7fa;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .navbar {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)) !important;
+            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.4rem;
+            letter-spacing: 0.5px;
+        }
+
+        .nav-link {
+            position: relative;
+            font-weight: 500;
+            padding: 0.8rem 1rem !important;
+            transition: all 0.3s ease;
+        }
+
+        .nav-link:after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            background-color: #fff;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            transition: width 0.3s ease;
+        }
+
+        .nav-link:hover:after,
+        .nav-link.active:after {
+            width: 60%;
+        }
+
+        .page-header {
+            background: linear-gradient(to right, #f8f9fa, #e9ecef);
+            border-radius: 1rem;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .welcome-message {
+            color: var(--dark-text);
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .welcome-subtitle {
+            color: #6c757d;
+            font-weight: 400;
+        }
+
+        .card {
+            border: none;
+            border-radius: 1rem;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            height: 100%;
+        }
+
+        .card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-body {
+            padding: 2rem;
+        }
+
+        .icon-container {
+            height: 80px;
+            width: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            margin: 0 auto 1.5rem;
+            background-color: rgba(67, 97, 238, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .card:hover .icon-container {
+            transform: scale(1.1);
+        }
+
+        .icon-large {
+            font-size: 2.5rem;
+        }
+
+        .weight-icon {
+            color: var(--primary-color);
+        }
+
+        .steps-icon {
+            color: var(--success-color);
+        }
+
+        .gps-icon {
+            color: var(--danger-color);
+        }
+
+        .workout-icon {
+            color: var(--warning-color);
+        }
+
+        .card-title {
+            font-weight: 600;
+            margin-bottom: 1rem;
+            font-size: 1.25rem;
+        }
+
+        .card-text {
+            color: #6c757d;
+            margin-bottom: 1.5rem;
+            font-size: 0.95rem;
+        }
+
+        .btn {
+            border-radius: 50px;
+            padding: 0.6rem 1.5rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            border: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(to right, var(--primary-color), var(--accent-color));
+        }
+
+        .btn-success {
+            background: linear-gradient(to right, #2ecc71, #27ae60);
+        }
+
+        .btn-danger {
+            background: linear-gradient(to right, #e74c3c, #c0392b);
+        }
+
+        .btn-warning {
+            background: linear-gradient(to right, #f39c12, #e67e22);
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .recent-activity {
+            border-radius: 1rem;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .recent-activity .card-header {
+            background: linear-gradient(to right, var(--primary-color), var(--accent-color));
+            color: white;
+            font-weight: 600;
+            padding: 1rem 1.5rem;
+            border: none;
+        }
+
+        .empty-state {
+            padding: 3rem 2rem;
+            text-align: center;
+        }
+
+        .empty-state-icon {
+            font-size: 3rem;
+            color: #dee2e6;
+            margin-bottom: 1rem;
+        }
+
+        .empty-state-text {
+            color: #adb5bd;
+            font-weight: 500;
+        }
+
+        footer {
+            background-color: #fff;
+            border-top: 1px solid #eaeaea;
+            padding: 1.5rem 0;
+            margin-top: auto;
+        }
+
+        .footer-text {
+            color: #6c757d;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 992px) {
+            .navbar-nav {
+                padding: 1rem 0;
+            }
+
+            .nav-link:after {
+                bottom: 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark">
+    <div class="container">
+        <a class="navbar-brand" href="/dashboard">
+            <i class="fas fa-heartbeat me-2"></i>PacePlanner
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item">
+                    <a class="nav-link active" href="/dashboard">
+                        <i class="fas fa-home me-1"></i> Dashboard
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/weight">
+                        <i class="fas fa-weight me-1"></i> Weight
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/steps">
+                        <i class="fas fa-shoe-prints me-1"></i> Steps
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/gps">
+                        <i class="fas fa-map-marker-alt me-1"></i> GPS
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/workouts">
+                        <i class="fas fa-dumbbell me-1"></i> Workouts
+                    </a>
+                </li>
+            </ul>
+            <ul class="navbar-nav">
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
+                       data-bs-toggle="dropdown">
+                        <i class="fas fa-user-circle me-1"></i> Account
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><a class="dropdown-item" href="/profile"><i class="fas fa-user me-2"></i> Profile</a></li>
+                        <li><a class="dropdown-item" href="/settings"><i class="fas fa-cog me-2"></i> Settings</a></li>
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
+                        <li><a class="dropdown-item" href="/logout"><i class="fas fa-sign-out-alt me-2"></i> Logout</a>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="container py-5">
+    <div class="page-header">
+        <h1 class="welcome-message">Welcome to PacePlanner</h1>
+        <p class="welcome-subtitle">Track your fitness journey and achieve your goals</p>
+    </div>
+
+    <div class="row">
+        <!-- Weight Tracking Card -->
+        <div class="col-md-6 col-lg-3 mb-4">
+            <div class="card text-center">
+                <div class="card-body">
+                    <div class="icon-container">
+                        <i class="fas fa-weight icon-large weight-icon"></i>
+                    </div>
+                    <h5 class="card-title">Weight Tracking</h5>
+                    <p class="card-text">Monitor your weight progress and trends over time with detailed analytics.</p>
+                    <a href="/weight" class="btn btn-primary">
+                        <i class="fas fa-chart-line me-2"></i>Track Weight
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step Tracking Card -->
+        <div class="col-md-6 col-lg-3 mb-4">
+            <div class="card text-center">
+                <div class="card-body">
+                    <div class="icon-container">
+                        <i class="fas fa-shoe-prints icon-large steps-icon"></i>
+                    </div>
+                    <h5 class="card-title">Step Tracking</h5>
+                    <p class="card-text">Keep track of your daily steps and weekly progress toward your movement
+                        goals.</p>
+                    <a href="/steps" class="btn btn-success">
+                        <i class="fas fa-walking me-2"></i>Track Steps
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- GPS Tracking Card -->
+        <div class="col-md-6 col-lg-3 mb-4">
+            <div class="card text-center">
+                <div class="card-body">
+                    <div class="icon-container">
+                        <i class="fas fa-map-marker-alt icon-large gps-icon"></i>
+                    </div>
+                    <h5 class="card-title">GPS Activities</h5>
+                    <p class="card-text">Record and analyze your outdoor activities with detailed route mapping.</p>
+                    <a href="/gps" class="btn btn-danger">
+                        <i class="fas fa-route me-2"></i>Track GPS
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Workout Analytics Card -->
+        <div class="col-md-6 col-lg-3 mb-4">
+            <div class="card text-center">
+                <div class="card-body">
+                    <div class="icon-container">
+                        <i class="fas fa-dumbbell icon-large workout-icon"></i>
+                    </div>
+                    <h5 class="card-title">Workout Analytics</h5>
+                    <p class="card-text">Log and analyze your workouts for better results and continuous
+                        improvement.</p>
+                    <a href="/workouts" class="btn btn-warning">
+                        <i class="fas fa-chart-bar me-2"></i>View Workouts
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Activity Section -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card recent-activity">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0">Recent Activity</h4>
+                    <button class="btn btn-sm btn-light">View All</button>
+                </div>
+                <div class="card-body empty-state">
+                    <i class="fas fa-history empty-state-icon"></i>
+                    <h5 class="empty-state-text">Your recent activity will appear here once you start tracking</h5>
+                    <a href="/quick-start" class="btn btn-primary mt-3">
+                        <i class="fas fa-plus me-2"></i>Start Tracking Now
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Stats Section -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-white">
+                    <h4 class="mb-0">Quick Stats</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-md-3 mb-3 mb-md-0">
+                            <h6 class="text-muted">Total Steps</h6>
+                            <h3 class="fw-bold">0</h3>
+                        </div>
+                        <div class="col-md-3 mb-3 mb-md-0">
+                            <h6 class="text-muted">Activities</h6>
+                            <h3 class="fw-bold">0</h3>
+                        </div>
+                        <div class="col-md-3 mb-3 mb-md-0">
+                            <h6 class="text-muted">Calories</h6>
+                            <h3 class="fw-bold">0</h3>
+                        </div>
+                        <div class="col-md-3">
+                            <h6 class="text-muted">Weight Change</h6>
+                            <h3 class="fw-bold">0 lb</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer>
+    <div class="container text-center">
+        <p class="footer-text mb-0">&copy; 2025 PacePlanner by Team 2 | <a href="/terms">Terms</a> | <a href="/privacy">Privacy</a>
+        </p>
+    </div>
+</footer>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

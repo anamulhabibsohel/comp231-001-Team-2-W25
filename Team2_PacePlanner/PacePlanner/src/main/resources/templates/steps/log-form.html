@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Log Steps - PacePlanner</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --secondary-color: #3a0ca3;
+            --accent-color: #4cc9f0;
+            --success-color: #4ade80;
+            --light-bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text-color: #1e293b;
+            --text-muted: #64748b;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--light-bg);
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+
+        .navbar {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 0.8rem 1rem;
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        .navbar .nav-link {
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            transition: all 0.3s ease;
+            border-radius: 6px;
+            margin: 0 2px;
+        }
+
+        .navbar .nav-link:hover,
+        .navbar .nav-link.active {
+            background-color: rgba(255, 255, 255, 0.15);
+        }
+
+        .page-header {
+            padding: 2rem 0 1.5rem;
+        }
+
+        .page-title {
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--secondary-color);
+        }
+
+        .card {
+            border: none;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, var(--success-color), var(--accent-color));
+            padding: 1.25rem 1.5rem;
+            border-bottom: none;
+        }
+
+        .card-header h5 {
+            font-weight: 600;
+            font-size: 1.25rem;
+        }
+
+        .card-body {
+            padding: 2rem;
+        }
+
+        .form-icon {
+            font-size: 3.5rem;
+            background: linear-gradient(135deg, var(--success-color), var(--accent-color));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            font-weight: 500;
+            color: var(--text-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .form-control {
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            border: 1px solid #e2e8f0;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.15);
+            border-color: var(--primary-color);
+        }
+
+        .form-text {
+            color: var(--text-muted);
+            font-size: 0.875rem;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            font-weight: 500;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, var(--success-color), #22c55e);
+            border: none;
+        }
+
+        .btn-success:hover {
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(34, 197, 94, 0.25);
+        }
+
+        .btn-secondary {
+            background-color: #e2e8f0;
+            color: var(--text-color);
+            border: none;
+        }
+
+        .btn-secondary:hover {
+            background-color: #cbd5e1;
+            color: var(--text-color);
+        }
+
+        .motivational-tip {
+            background-color: rgba(76, 201, 240, 0.1);
+            border-left: 4px solid var(--accent-color);
+            padding: 1rem;
+            border-radius: 0 8px 8px 0;
+            margin-top: 2rem;
+        }
+
+        footer {
+            background-color: var(--card-bg);
+            padding: 1.5rem 0;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+            margin-top: 5rem;
+        }
+    </style>
+</head>
+<body>
+<!-- Navigation Bar -->
+<nav class="navbar navbar-expand-lg navbar-dark">
+    <div class="container">
+        <a class="navbar-brand" href="/dashboard">
+            <i class="fas fa-running me-2"></i>PacePlanner
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link" href="/dashboard">
+                        <i class="fas fa-chart-line me-1"></i> Dashboard
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" href="/steps">
+                        <i class="fas fa-shoe-prints me-1"></i> Steps
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/weight">
+                        <i class="fas fa-weight me-1"></i> Weight
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/gps">
+                        <i class="fas fa-map-marker-alt me-1"></i> GPS
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/workouts">
+                        <i class="fas fa-dumbbell me-1"></i> Workouts
+                    </a>
+                </li>
+            </ul>
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="/profile">
+                        <i class="fas fa-user-circle me-1"></i> Profile
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/logout">
+                        <i class="fas fa-sign-out-alt me-1"></i> Logout
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- Main Content -->
+<div class="container">
+    <div class="page-header">
+        <h1 class="page-title">Log Your Steps</h1>
+        <p class="lead text-muted">Keep track of your daily activity and progress towards your goals</p>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-7 col-md-10">
+            <div class="card">
+                <div class="card-header text-white">
+                    <h5 class="mb-0"><i class="fas fa-edit me-2"></i>Enter Step Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-shoe-prints form-icon"></i>
+                    </div>
+
+                    <form th:action="@{/steps/log}" th:object="${stepTracking}" method="post">
+                        <!-- Hidden user ID field -->
+                        <input type="hidden" th:field="*{userId}"/>
+
+                        <div class="mb-4">
+                            <label for="date" class="form-label">Date</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-white">
+                                    <i class="far fa-calendar-alt text-primary"></i>
+                                </span>
+                                <input type="date" class="form-control" id="date" th:field="*{trackingDate}" required>
+                            </div>
+                            <div class="form-text">When did you take these steps?</div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="stepCount" class="form-label">Step Count</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-white">
+                                    <i class="fas fa-walking text-primary"></i>
+                                </span>
+                                <input type="number" class="form-control" id="stepCount" th:field="*{steps}"
+                                       min="0" max="100000" required>
+                            </div>
+                            <div class="form-text">How many steps did you complete?</div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="notes" class="form-label">Notes (Optional)</label>
+                            <textarea class="form-control" id="notes" th:field="*{notes}" rows="3"
+                                      placeholder="Add any details about your activity (location, weather, how you felt)"></textarea>
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                            <a href="/steps" class="btn btn-secondary me-md-2">
+                                <i class="fas fa-times me-1"></i> Cancel
+                            </a>
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-save me-1"></i> Save Steps
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="motivational-tip">
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-lightbulb fs-4 me-3 text-warning"></i>
+                    <div>
+                        <h6 class="fw-bold mb-1">Daily Insight</h6>
+                        <p class="mb-0">Walking 10,000 steps burns approximately 300-500 calories. Even small increases
+                            in daily steps can have significant health benefits over time.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Footer -->
+<footer class="text-center text-muted">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-8 mx-auto">
+                <p class="mb-2">
+                    <i class="fas fa-heart text-danger me-1"></i>
+                    PacePlanner helps you track progress and achieve your fitness goals
+                </p>
+                <p class="small mb-0">&copy; 2025 PacePlanner. All rights reserved.</p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Set default date to today
+    document.addEventListener('DOMContentLoaded', function () {
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('date').value = today;
+
+        // Add smooth focus effects
+        const inputs = document.querySelectorAll('.form-control');
+        inputs.forEach(input => {
+            input.addEventListener('focus', function () {
+                this.parentElement.style.transition = 'all 0.3s ease';
+                if (this.parentElement.classList.contains('input-group')) {
+                    this.parentElement.style.boxShadow = '0 0 0 3px rgba(67, 97, 238, 0.15)';
+                }
+            });
+
+            input.addEventListener('blur', function () {
+                if (this.parentElement.classList.contains('input-group')) {
+                    this.parentElement.style.boxShadow = 'none';
+                }
+            });
+        });
+    });
+</script>
+</body>
+</html>

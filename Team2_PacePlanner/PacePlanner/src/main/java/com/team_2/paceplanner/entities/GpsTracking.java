@@ -32,5 +32,23 @@ public class GpsTracking {
     @Column(nullable = false)
     private double altitude;
 
+    private String activityType;
+
+    private Double distance; // In kilometers
+
+    private String duration; // Stored as hh:mm:ss string
+
+    private String pace; // Stored as mm:ss string
+
+    private Double elevationGain;
+
+    private String activityName;
+
+    @Column(columnDefinition = "TEXT")
+    private String notes;
+
+    @Column(columnDefinition = "TEXT")
+    private String routeData;
+
     private LocalDateTime recordedAt = LocalDateTime.now();
 }
