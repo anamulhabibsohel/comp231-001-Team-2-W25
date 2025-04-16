@@ -5,36 +5,231 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Log GPS Activity - PacePlanner</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="/css/main.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --primary-hover: #3a56d4;
+            --secondary-color: #3f37c9;
+            --accent-color: #4cc9f0;
+            --light-gray: #f8f9fa;
+            --text-color: #333;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: var(--text-color);
+            background-color: #f0f2f5;
+        }
+
+        .navbar {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)) !important;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 0.7rem 1rem;
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        .nav-link {
+            font-weight: 500;
+            position: relative;
+            padding: 0.5rem 1rem;
+        }
+
+        .nav-link.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 25%;
+            width: 50%;
+            height: 3px;
+            background-color: var(--accent-color);
+            border-radius: 2px;
+        }
+
+        .card {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-header {
+            background-color: white;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            border-radius: 12px 12px 0 0 !important;
+            padding: 1.25rem 1.5rem;
+        }
+
+        .card-title {
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+
+        .card-body {
+            padding: 1.5rem;
+        }
+
+        .form-label {
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-control, .form-select {
+            border-radius: 8px;
+            padding: 0.6rem 1rem;
+            border: 1px solid #dee2e6;
+            transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(67, 97, 238, 0.15);
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            border-radius: 8px;
+            padding: 0.6rem 1.5rem;
+            font-weight: 500;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-hover);
+            border-color: var(--primary-hover);
+        }
+
+        .btn-secondary {
+            background-color: #6c757d;
+            border-radius: 8px;
+            padding: 0.6rem 1.5rem;
+            font-weight: 500;
+        }
+
+        .btn-outline-secondary {
+            border-radius: 8px;
+            padding: 0.6rem 1.5rem;
+            font-weight: 500;
+        }
+
+        .page-header {
+            background-color: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .form-text {
+            color: #6c757d;
+            font-size: 0.8rem;
+        }
+
+        .activity-icon {
+            margin-right: 8px;
+        }
+
+        footer {
+            background-color: var(--light-gray);
+            border-top: 1px solid rgba(0, 0, 0, 0.05);
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+
+        /* Activity Type Styling */
+        .activity-type-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 1rem;
+        }
+
+        .activity-type-option {
+            display: none;
+        }
+
+        .activity-type-label {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100px;
+            height: 100px;
+            border: 2px solid #dee2e6;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .activity-type-label:hover {
+            border-color: var(--primary-color);
+            background-color: rgba(67, 97, 238, 0.05);
+        }
+
+        .activity-type-option:checked + .activity-type-label {
+            border-color: var(--primary-color);
+            background-color: rgba(67, 97, 238, 0.1);
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+
+        .activity-type-icon {
+            font-size: 2rem;
+            margin-bottom: 8px;
+        }
+    </style>
 </head>
 <body>
-<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+<nav class="navbar navbar-expand-lg navbar-dark">
     <div class="container">
-        <a class="navbar-brand" href="/dashboard">PacePlanner</a>
+        <a class="navbar-brand" href="/dashboard">
+            <i class="fas fa-running me-2"></i>PacePlanner
+        </a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav">
                 <li class="nav-item">
-                    <a class="nav-link" href="/dashboard">Dashboard</a>
+                    <a class="nav-link" href="/dashboard">
+                        <i class="fas fa-chart-line me-1"></i>Dashboard
+                    </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link active" href="/gps">GPS Tracking</a>
+                    <a class="nav-link active" href="/gps">
+                        <i class="fas fa-map-marker-alt me-1"></i>GPS Tracking
+                    </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="/steps">Step Tracking</a>
+                    <a class="nav-link" href="/steps">
+                        <i class="fas fa-shoe-prints me-1"></i>Step Tracking
+                    </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="/weight">Weight Tracking</a>
+                    <a class="nav-link" href="/weight">
+                        <i class="fas fa-weight me-1"></i>Weight Tracking
+                    </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="/workouts">Workouts</a>
+                    <a class="nav-link" href="/workouts">
+                        <i class="fas fa-dumbbell me-1"></i>Workouts
+                    </a>
                 </li>
             </ul>
             <ul class="navbar-nav ms-auto">
                 <li class="nav-item">
-                    <a class="nav-link" href="/logout">Logout</a>
+                    <a class="nav-link" href="/logout">
+                        <i class="fas fa-sign-out-alt me-1"></i>Logout
+                    </a>
                 </li>
             </ul>
         </div>
@@ -42,101 +237,165 @@
 </nav>
 
 <div class="container my-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1>Log GPS Activity</h1>
-        <a href="/gps" class="btn btn-secondary">Back to GPS Activities</a>
+    <div class="page-header d-flex justify-content-between align-items-center">
+        <h1 class="h3 mb-0">
+            <i class="fas fa-map-marked-alt me-2 text-primary"></i>Log GPS Activity
+        </h1>
+        <a href="/gps" class="btn btn-secondary">
+            <i class="fas fa-arrow-left me-2"></i>Back to GPS Activities
+        </a>
     </div>
 
     <div class="row">
-        <div class="col-md-8 mx-auto">
+        <div class="col-md-10 mx-auto">
             <div class="card">
                 <div class="card-header">
-                    <h5 class="card-title mb-0">Activity Details</h5>
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-edit me-2"></i>Activity Details
+                    </h5>
                 </div>
                 <div class="card-body">
                     <form th:action="@{/gps/save}" th:object="${gpsTracking}" method="post">
-                        <input type="hidden" th:field="*{userId}" />
+                        <input type="hidden" th:field="*{userId}"/>
 
                         <!-- Required fields for GpsTracking entity -->
-                        <input type="hidden" th:field="*{latitude}" value="0" />
-                        <input type="hidden" th:field="*{longitude}" value="0" />
-                        <input type="hidden" th:field="*{altitude}" value="0" />
+                        <input type="hidden" th:field="*{latitude}" value="0"/>
+                        <input type="hidden" th:field="*{longitude}" value="0"/>
+                        <input type="hidden" th:field="*{altitude}" value="0"/>
 
-                        <!-- Activity Date (will be converted to recordedAt) -->
-                        <div class="mb-3">
-                            <label for="recordedAt" class="form-label">Activity Date</label>
-                            <input type="datetime-local" class="form-control" id="recordedAt" th:field="*{recordedAt}" required>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="activityType" class="form-label">Activity Type</label>
-                            <select class="form-select" id="activityType" th:field="*{activityType}" required>
-                                <option value="">Select Activity Type</option>
-                                <option value="Running">Running</option>
-                                <option value="Walking">Walking</option>
-                                <option value="Cycling">Cycling</option>
-                                <option value="Hiking">Hiking</option>
-                                <option value="Swimming">Swimming</option>
-                                <option value="Other">Other</option>
-                            </select>
-                        </div>
-
-                        <div class="row mb-3">
+                        <div class="row g-4">
                             <div class="col-md-6">
-                                <label for="distance" class="form-label">Distance (km)</label>
-                                <input type="number" step="0.01" min="0" class="form-control" id="distance" th:field="*{distance}" required>
+                                <div class="mb-3">
+                                    <label for="activityName" class="form-label">
+                                        <i class="fas fa-heading me-1"></i>Activity Name
+                                    </label>
+                                    <input type="text" class="form-control" id="activityName" th:field="*{activityName}"
+                                           placeholder="e.g. Morning Run, City Park Loop" required>
+                                </div>
                             </div>
+
                             <div class="col-md-6">
-                                <label for="duration" class="form-label">Duration (hh:mm:ss)</label>
-                                <input type="text" class="form-control" id="duration" th:field="*{duration}"
-                                       placeholder="e.g. 01:30:00" pattern="[0-9]{1,2}:[0-5][0-9]:[0-5][0-9]" required>
-                                <div class="form-text">Format: hh:mm:ss (e.g. 01:30:00 for 1 hour and 30 minutes)</div>
+                                <div class="mb-3">
+                                    <label for="recordedAt" class="form-label">
+                                        <i class="far fa-calendar-alt me-1"></i>Activity Date & Time
+                                    </label>
+                                    <input type="datetime-local" class="form-control" id="recordedAt"
+                                           th:field="*{recordedAt}" required>
+                                </div>
                             </div>
                         </div>
 
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label for="pace" class="form-label">Average Pace (min/km)</label>
-                                <input type="text" class="form-control" id="pace" th:field="*{pace}"
-                                       placeholder="e.g. 5:30" pattern="[0-9]{1,2}:[0-5][0-9]">
-                                <div class="form-text">Format: mm:ss (e.g. 5:30 for 5 minutes 30 seconds per km)</div>
-                            </div>
-                            <div class="col-md-6">
-                                <label for="elevationGain" class="form-label">Elevation Gain (m)</label>
-                                <input type="number" class="form-control" id="elevationGain" th:field="*{elevationGain}">
-                            </div>
-                        </div>
+                        <div class="mb-4">
+                            <label class="form-label d-block">
+                                <i class="fas fa-running me-1"></i>Activity Type
+                            </label>
+                            <div class="activity-type-container">
+                                <input type="radio" name="activityType" id="type-running" value="Running"
+                                       class="activity-type-option" th:field="*{activityType}" required>
+                                <label for="type-running" class="activity-type-label">
+                                    <i class="fas fa-running activity-type-icon"></i>
+                                    <span>Running</span>
+                                </label>
 
-                        <div class="mb-3">
-                            <label for="activityName" class="form-label">Activity Name</label>
-                            <input type="text" class="form-control" id="activityName" th:field="*{activityName}" required>
-                            <div class="form-text">Give your activity a name (e.g. "Morning Run", "City Park Loop")</div>
-                        </div>
+                                <input type="radio" name="activityType" id="type-walking" value="Walking"
+                                       class="activity-type-option" th:field="*{activityType}">
+                                <label for="type-walking" class="activity-type-label">
+                                    <i class="fas fa-walking activity-type-icon"></i>
+                                    <span>Walking</span>
+                                </label>
 
-                        <div class="mb-3">
-                            <label for="notes" class="form-label">Notes</label>
-                            <textarea class="form-control" id="notes" th:field="*{notes}" rows="3"></textarea>
-                            <div class="form-text">Add any notes about your activity (optional)</div>
-                        </div>
+                                <input type="radio" name="activityType" id="type-cycling" value="Cycling"
+                                       class="activity-type-option" th:field="*{activityType}">
+                                <label for="type-cycling" class="activity-type-label">
+                                    <i class="fas fa-biking activity-type-icon"></i>
+                                    <span>Cycling</span>
+                                </label>
 
-                        <div class="mb-3">
-                            <label for="routeData" class="form-label">Route (optional)</label>
-                            <textarea class="form-control" id="routeData" th:field="*{routeData}" rows="3"></textarea>
-                            <div class="form-text">If you have GPS route data, paste it here (GeoJSON or GPX format)</div>
-                        </div>
+                                <input type="radio" name="activityType" id="type-hiking" value="Hiking"
+                                       class="activity-type-option" th:field="*{activityType}">
+                                <label for="type-hiking" class="activity-type-label">
+                                    <i class="fas fa-hiking activity-type-icon"></i>
+                                    <span>Hiking</span>
+                                </label>
 
-                        <div class="mb-3">
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="calculatedPace">
-                                <label class="form-check-label" for="calculatedPace">
-                                    Calculate pace from distance and duration
+                                <input type="radio" name="activityType" id="type-swimming" value="Swimming"
+                                       class="activity-type-option" th:field="*{activityType}">
+                                <label for="type-swimming" class="activity-type-label">
+                                    <i class="fas fa-swimmer activity-type-icon"></i>
+                                    <span>Swimming</span>
+                                </label>
+
+                                <input type="radio" name="activityType" id="type-other" value="Other"
+                                       class="activity-type-option" th:field="*{activityType}">
+                                <label for="type-other" class="activity-type-label">
+                                    <i class="fas fa-plus activity-type-icon"></i>
+                                    <span>Other</span>
                                 </label>
                             </div>
                         </div>
 
-                        <div class="d-grid gap-2">
-                            <button type="submit" class="btn btn-primary">Save Activity</button>
-                            <a href="/gps" class="btn btn-outline-secondary">Cancel</a>
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-4">
+                                <label for="distance" class="form-label">
+                                    <i class="fas fa-route me-1"></i>Distance (km)
+                                </label>
+                                <input type="number" step="0.01" min="0" class="form-control" id="distance"
+                                       th:field="*{distance}" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="duration" class="form-label">
+                                    <i class="far fa-clock me-1"></i>Duration (hh:mm:ss)
+                                </label>
+                                <input type="text" class="form-control" id="duration" th:field="*{duration}"
+                                       placeholder="e.g. 01:30:00" pattern="[0-9]{1,2}:[0-5][0-9]:[0-5][0-9]" required>
+                                <div class="form-text">Format: hh:mm:ss (e.g. 01:30:00)</div>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="pace" class="form-label">
+                                    <i class="fas fa-tachometer-alt me-1"></i>Average Pace (min/km)
+                                </label>
+                                <div class="input-group">
+                                    <input type="text" class="form-control" id="pace" th:field="*{pace}"
+                                           placeholder="e.g. 5:30" pattern="[0-9]{1,2}:[0-5][0-9]">
+                                    <button class="btn btn-outline-secondary" type="button" id="calculatedPace">
+                                        <i class="fas fa-calculator"></i>
+                                    </button>
+                                </div>
+                                <div class="form-text">Format: mm:ss (e.g. 5:30)</div>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="elevationGain" class="form-label">
+                                <i class="fas fa-mountain me-1"></i>Elevation Gain (m)
+                            </label>
+                            <input type="number" class="form-control" id="elevationGain" th:field="*{elevationGain}"
+                                   placeholder="e.g. 120">
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="notes" class="form-label">
+                                <i class="fas fa-sticky-note me-1"></i>Notes
+                            </label>
+                            <textarea class="form-control" id="notes" th:field="*{notes}" rows="3"
+                                      placeholder="Add any notes about your activity (how you felt, weather conditions, etc.)"></textarea>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="routeData" class="form-label">
+                                <i class="fas fa-map me-1"></i>Route (optional)
+                            </label>
+                            <textarea class="form-control" id="routeData" th:field="*{routeData}" rows="3"
+                                      placeholder="If you have GPS route data, paste it here (GeoJSON or GPX format)"></textarea>
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                            <a href="/gps" class="btn btn-outline-secondary me-md-2">
+                                <i class="fas fa-times me-2"></i>Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>Save Activity
+                            </button>
                         </div>
                     </form>
                 </div>
@@ -145,15 +404,16 @@
     </div>
 </div>
 
-<footer class="bg-light py-3 mt-5">
+<footer class="py-4 mt-5">
     <div class="container text-center">
-        <p class="mb-0">© 2025 PacePlanner. All rights reserved.</p>
+        <p class="mb-1">© 2025 PacePlanner. All rights reserved.</p>
+        <p class="small text-muted mb-0">Track your progress. Achieve your goals.</p>
     </div>
 </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
         // Set default datetime to now
         const now = new Date();
         const year = now.getFullYear();
@@ -164,15 +424,13 @@
 
         document.getElementById('recordedAt').value = `${year}-${month}-${day}T${hours}:${minutes}`;
 
-        // Auto calculate pace when checkbox is checked
+        // Auto calculate pace when button is clicked
         const distanceInput = document.getElementById('distance');
         const durationInput = document.getElementById('duration');
         const paceInput = document.getElementById('pace');
-        const calculatePaceCheckbox = document.getElementById('calculatedPace');
+        const calculatePaceButton = document.getElementById('calculatedPace');
 
         function calculatePace() {
-            if (!calculatePaceCheckbox.checked) return;
-
             const distance = parseFloat(distanceInput.value);
             const durationParts = durationInput.value.split(':');
 
@@ -187,12 +445,25 @@
 
                 paceInput.value = paceMinutes + ':' +
                     (paceSeconds < 10 ? '0' + paceSeconds : paceSeconds);
+            } else {
+                alert('Please enter valid distance and duration values');
             }
         }
 
-        distanceInput.addEventListener('input', calculatePace);
-        durationInput.addEventListener('input', calculatePace);
-        calculatePaceCheckbox.addEventListener('change', calculatePace);
+        calculatePaceButton.addEventListener('click', calculatePace);
+
+        // Add animation effects to activity type selection
+        const activityOptions = document.querySelectorAll('.activity-type-option');
+        activityOptions.forEach(option => {
+            option.addEventListener('change', function () {
+                document.querySelectorAll('.activity-type-label').forEach(label => {
+                    label.classList.remove('active');
+                });
+                if (this.checked) {
+                    this.nextElementSibling.classList.add('active');
+                }
+            });
+        });
     });
 </script>
 </body>
