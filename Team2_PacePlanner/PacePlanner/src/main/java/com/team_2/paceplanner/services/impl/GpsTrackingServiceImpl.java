@@ -17,6 +17,11 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Service implementation for managing GPS tracking records.
+ * Provides functionality for saving GPS data and fetching live location information
+ * using the ipgeolocation.io API.
+ */
 @Service
 public class GpsTrackingServiceImpl implements GpsTrackingService {
 
@@ -25,22 +30,63 @@ public class GpsTrackingServiceImpl implements GpsTrackingService {
     @Value("${ipgeolocation.api.key}")
     private String apiKey;
 
+    /**
+     * Constructs a new GpsTrackingServiceImpl.
+     *
+     * @param repository the repository for GPS tracking operations
+     */
     @Autowired
     public GpsTrackingServiceImpl(GpsTrackingRepository repository) {
         this.repository = repository;
     }
 
+    /**
+     * Saves GPS tracking data in a transaction.
+     * Algorithm:
+     * 1. Persists GPS record to database
+     * 2. Returns saved entity with generated ID
+     *
+     * @param gpsTracking the GPS tracking record to save
+     * @return the saved GPS tracking record
+     */
     @Override
     @Transactional
     public GpsTracking saveGpsData(GpsTracking gpsTracking) {
         return repository.save(gpsTracking);
     }
 
+    /**
+     * Retrieves recent GPS tracking records for a user.
+     * Algorithm:
+     * 1. Queries repository for recent records by userId
+     * 2. Returns list ordered by timestamp
+     *
+     * @param userId the user's ID
+     * @return list of recent GPS tracking records
+     */
     @Override
     public List<GpsTracking> getRecentGpsData(Long userId) {
         return repository.findRecentGpsData(userId);
     }
 
+    /**
+     * Fetches live GPS data from ipgeolocation.io API.
+     * Algorithm:
+     * 1. Builds API URL with authentication key
+     * 2. Opens HTTP connection and sends GET request
+     * 3. Validates response code (200 for success)
+     * 4. Reads response stream into string buffer
+     * 5. Parses JSON response and extracts:
+     * - Latitude and longitude
+     * - City and country names
+     * - Country emoji flag
+     * 6. Creates and saves GPS tracking record
+     * 7. Builds simplified JSON response
+     * 8. Returns Optional containing response or empty if error
+     *
+     * @param userId the user's ID
+     * @return Optional containing location data as JSONObject
+     */
     @Override
     public Optional<JSONObject> fetchLiveGpsData(Long userId) {
         try {

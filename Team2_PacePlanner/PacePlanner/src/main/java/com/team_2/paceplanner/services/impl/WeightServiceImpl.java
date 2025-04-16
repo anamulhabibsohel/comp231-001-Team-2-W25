@@ -10,16 +10,34 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+/**
+ * Service implementation for managing weight records.
+ * Provides functionality for saving and retrieving user weight data.
+ */
 @Service
 public class WeightServiceImpl implements WeightService {
 
     private final WeightRecordRepository repository;
 
+    /**
+     * Constructs a new WeightServiceImpl with the specified repository.
+     *
+     * @param repository the repository for weight record operations
+     */
     @Autowired
     public WeightServiceImpl(WeightRecordRepository repository) {
         this.repository = repository;
     }
 
+    /**
+     * Saves a new weight record for a user.
+     * Algorithm:
+     * 1. Creates new WeightRecord entity
+     * 2. Maps DTO fields to entity
+     * 3. Persists entity to database
+     *
+     * @param dto the weight record data transfer object
+     */
     @Override
     public void saveWeight(WeightRecordDTO dto) {
         WeightRecord record = new WeightRecord();
@@ -30,6 +48,18 @@ public class WeightServiceImpl implements WeightService {
         repository.save(record);
     }
 
+    /**
+     * Retrieves the weight history for a specific user.
+     * Algorithm:
+     * 1. Queries repository for records by userId
+     * 2. Streams results and maps each entity to DTO:
+     * - Sets userId from record
+     * - Copies weight value
+     * 3. Collects results to immutable list
+     *
+     * @param userId the ID of the user
+     * @return list of weight records for the user
+     */
     @Override
     public List<WeightRecordDTO> getUserWeightHistory(Long userId) {
         return repository.findByUserId(userId).stream()
